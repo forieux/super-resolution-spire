@@ -1,0 +1,15 @@
+!!! IMPORTANT !!
+
+All the transfert function must be compute by respecting the zero
+convention of the fft2 (when you do Hrond = fft2(H), zero of H must be
+in (1,1)). In addition to avoid phase problem, H must be zero padded
+and of size Nalpha x Nbeta.
+
+The fft is considered to be normalized.
+
+To help you, and in this actual code, you will found three function :
+- ufft2 : a normalized fft to use on all the signal
+- ufft2ri : the equivalent to use only on impultionnal response. Si
+  the PSF of the instrument but also on regularization operator.
+- uifft2 : a inverse normalized ifft2 to use on signal that have been
+  filter by the transfert function for example.

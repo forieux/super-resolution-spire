@@ -1,0 +1,33 @@
+function [map offsets ooptim] = invGpacOffsets(init, opt, data, hypers, Hrond, ...
+                                                 index, offsets, regOp, objectMean, ...
+                                                 Nalpha, Nbeta, Norder, Nscan, ...
+                                                 Nbolo, Nspeed, uspeed, theSpeeds, repeat, ...
+                                                 varargin)
+  %% usage:  inversionOffsets ()
+  %%
+  %%
+
+  ndata = cell(size(data));
+  for iRun = 1:repeat
+    
+    for iscan = 1:Nscan
+      ndata(iscan) = {data{iscan} - repmat(offsets, size(data{iscan},1),1)};
+    end
+    
+    [map sortieops histo] = gpac('calcQuadCrit', init, opt, ...
+                                 'calcQuadGrad', ndata, hypers, Hrond, ...
+                                 index, regOp, objectMean, Nalpha, ...
+                                 Nbeta, Norder, Nbolo, Nspeed, Nscan, ...
+                                 uspeed, theSpeeds, varargin{:});
+
+    dataRepro = directInvariant(map, Hrond, index, Nalpha, Nbeta, ...
+                                Norder, Nbolo, Nspeed, Nscan, uspeed, ...
+                                theSpeeds);
+
+    offsets = estimOffsets(data, dataRepro, Nscan);
+    
+  end
+  
+  ooptim = {sortieops histo};
+
+end

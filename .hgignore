@@ -1,0 +1,19 @@
+syntax: glob
+lab/*
+data&true/*
+.smt/*
+.ropeproject/*
+Data/*
+archive/*
+figs/*
+*.DS_Store
+*.lab
+*.png
+*.tif
+*.tiff
+*.mat
+*.pyc
+*.h5
+*.eps
+*.glade
+
