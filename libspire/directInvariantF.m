@@ -53,12 +53,12 @@ function data  = directInvariantF(sky, Hrond, index, Nalpha, Nbeta, ...
   %% index250, index360, index520, Nalpha, Nbeta, Norder)
 
   x_tmp = zeros(Nalpha, Nbeta, Nspeed);
-  
+
   %% Make a convolution for each order for each speed
   for iorder = 0:Norder-1
 
     for ispeed = 1:Nspeed
-      
+
       %% The convolution
       iorder_s = real(uifft2(sky(:,:,iorder+1).*Hrond(:,:, iorder+1, ispeed)));
       %% Sum of order (but depend on speed)
@@ -69,10 +69,10 @@ function data  = directInvariantF(sky, Hrond, index, Nalpha, Nbeta, ...
 
   %% init
   scans = cell(1,Nscan);
-  
+
   %% Prelevement and rearanging
   for iscan = 1:Nscan
-    
+
     %% identify the PSF with the speed
     x_tmp_tmp = x_tmp(:,:,uspeed(1,:) == theSpeeds(1,iscan));
     %% Extract the observed pixel for that scan from tmp
@@ -84,7 +84,7 @@ function data  = directInvariantF(sky, Hrond, index, Nalpha, Nbeta, ...
     %% coefs... :)
     scans(iscan) = {reshape(observed, numel(index{iscan})/Nbolo, [])};
   end
-  
+
   data = scans;
-  
+
 end

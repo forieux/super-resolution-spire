@@ -1,7 +1,7 @@
 clear all
 
 %% Base
-placemount = '/home/space/results/'
+placemount = '/mnt/space/results/'
 expname = 'aa2';
 system(['mkdir -p ',placemount,expname]);
 addpath('../../')
@@ -90,7 +90,7 @@ init = zeros(Nalpha, Nbeta);
 
 hypersInit = zeros(2,3);
 hypersInit(1,1) = gammaB250;
-wbwbhypersInit(2,1) = 3.5e+11;
+hypersInit(2,1) = 3.5e+11;
 
 meanInst = physical_sigma_coef;
 mean_sigma_coef = meanInst;

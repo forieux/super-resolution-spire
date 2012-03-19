@@ -201,7 +201,7 @@ function [skyEap gnChain gxChain instChain rate] = myopicUsmse(init, hypersInit,
 %                                 1/(betaXbar + ...
 %                                    sum(regularity(:))/2));
       regularity = regularity(xbound(1):xbound(2), ybound(1):ybound(2));
-      
+
       gxSample(iorder) = gamrnd(alphaX + ((xbound(2)-xbound(1))*(ybound(2)-ybound(1)) - 1)/2, ...
                                 1/(betaXbar + ...
                                    sum(regularity(:))/2));
@@ -213,7 +213,7 @@ function [skyEap gnChain gxChain instChain rate] = myopicUsmse(init, hypersInit,
 
     minunif = 3.25e4;
     maxunif = 3.5e4;
-    
+
     logpdf = @(x) theLogPdf(x, riParams, position, skySample, index, ...
                             Nalpha, Nbeta, Norder, Nbolo, Nspeed, ...
                             Nscan, uspeed, theSpeeds, data, meanInst, ...
@@ -223,7 +223,7 @@ function [skyEap gnChain gxChain instChain rate] = myopicUsmse(init, hypersInit,
     %logproppdf = @(x, y) log(unifpdf(x,minunif,maxunif));
     proprnd = @(x) normrnd(x, excursion);
     %proprnd = @(x) unifrnd(minunif,maxunif);
-    
+
     [newInstSample accepted] = mhsample(instSample, 1, 'logpdf', logpdf, 'logproppdf', logproppdf, 'proprnd', proprnd);
 
     instChain(iteration) = newInstSample;
@@ -353,21 +353,21 @@ function crit = theLogPdf(x, riParams, position, skySample, index, Nalpha, Nbeta
 end
 
 % function crit = theLogPdf(x, riParams, position, skySample, index, Nalpha, Nbeta, Norder, Nbolo, Nspeed, Nscan, uspeed, theSpeeds, data, priorMean, priorStd, gnoise, minunif, maxunif)
-% 
+%
 %   riParams{position} = x;
 %   [HrondProp HdirectProp] = computeRI(riParams{:});
 %   repro = directInvariantF(skySample, HrondProp, index, ...
 %                            Nalpha, Nbeta, Norder, Nbolo, ...
 %                            Nspeed, Nscan, uspeed, theSpeeds);
-% 
+%
 %   dataAdeq = 0;
 %   for iscan = 1:Nscan
 %     dataAdeq = dataAdeq + sum(sum((data{iscan} - repro{iscan}).^2));
 %   end
-% 
+%
 %   %priorAdeq = -(x - priorMean)^2/(2*priorStd^2);
 %   priorAdeq = unifpdf(x,minunif,maxunif);
-% 
+%
 %   crit = -gnoise/2*dataAdeq + priorAdeq;
-% 
+%
 % end
