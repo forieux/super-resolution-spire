@@ -83,8 +83,6 @@ cgoptions.thresold = 1e-8;
 cgoptions.maxIter = 40;
 %% cgoptions.numfig = 1000;
 criterion = 1e-4;
-burnin = 2000; %% If you don't know this value it is more than 100
-maxIter = 5000; %% If you don't know it is more 200
 
 init = zeros(Nalpha, Nbeta);
 
@@ -100,6 +98,11 @@ riParams = {10, 1, band_250, central_wavelength_250, mean_sigma_coef, ...
             time_constante, gain};
 position = 5;
 
+obs250 = calcObsPix(coefs250, Nalpha, Nbeta, N_scan_total);
+%obs250 = ones(size(obs250))
+
+burnin = 2000; %% If you don't know this value it is more than 100
+maxIter = 5000; %% If you don't know it is more 200
 [skyEap gnChain gxChain instChain rate] = myopicUsmse(init, hypersInit, data250, ...
                                        Hrond250, index250, coefs250, ...
                                        offsets, regOp, Nalpha, ...
@@ -109,7 +112,7 @@ position = 5;
                                        sigmaInst, meanInst, ...
                                        riParams, position, ...
                                        criterion, burnin, maxIter, ...
-                                       cgoptions, 100, [100, 400], [100, 600]);
+                                       cgoptions, 100, obs250);
 
 disp(['Vrai :', num2str(true_sigma_coef)])
 disp(['Mean (sigma) :', num2str(meanInst), ' (', num2str(sigmaInst),')'])

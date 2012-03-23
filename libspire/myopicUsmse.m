@@ -7,7 +7,7 @@ function [skyEap gnChain gxChain instChain rate] = myopicUsmse(init, hypersInit,
                                           meanInst, riParams, ...
                                           position, criterion, ...
                                           burnin, maxIter, ...
-                                          optoptions, excursion, xbound, ybound, varargin)
+                                          optoptions, excursion, obs, varargin)
   %% USMSE - Unsupervised mean square error
   %%
   %% This algorithm implement an unsupervised (hyper parameters
@@ -191,20 +191,12 @@ function [skyEap gnChain gxChain instChain rate] = myopicUsmse(init, hypersInit,
     for iorder = 1:Norder
 
       %% gammaI (Fx^dag) Q_I (Fx)
-      regularity = ...
-          real(conj(skySample(:,:,iorder)).*regOps(:,:,iorder).* ...
-               skySample(:,:,iorder));
-
+      %regularity = obs .* real(uifft2(sqrt(regOps(:,:,iorder)) .* skySample(:,:,iorder)));
+      regularity = obs .* real(conj(skySample(:,:,iorder)) .* regOps(:,:,iorder) .* skySample(:,:,iorder));
 
       %% modified
-%       gxSample(iorder) = gamrnd(alphaX + (Nalpha*Nbeta - 1)/2, ...
-%                                 1/(betaXbar + ...
-%                                    sum(regularity(:))/2));
-      regularity = regularity(xbound(1):xbound(2), ybound(1):ybound(2));
-
-      gxSample(iorder) = gamrnd(alphaX + ((xbound(2)-xbound(1))*(ybound(2)-ybound(1)) - 1)/2, ...
-                                1/(betaXbar + ...
-                                   sum(regularity(:))/2));
+      %gxSample(iorder) = gamrnd(alphaX + (nnz(obs) - 1)/2, 1/(betaXbar + sum(regularity(:).^2)/2));
+      gxSample(iorder) = gamrnd(alphaX + (nnz(obs) - 1)/2, 1/(betaXbar + sum(regularity(:))/2));
     end
     gxChain(:,iteration) = gxSample;
 
@@ -320,7 +312,7 @@ function [skyEap gnChain gxChain instChain rate] = myopicUsmse(init, hypersInit,
     tLoop = (cputime - t0)/60;
     leftTime = tLoop*(maxIter - iteration);
 
-    txtprogressbar(iteration/maxIter, [num2str(iteration),'/',num2str(maxIter),' [',num2str(burnin),'] | d=',num2str(delta),'>',num2str(criterion)])
+    txtprogressbar(iteration/maxIter, [num2str(iteration),'/',num2str(maxIter),' [',num2str(burnin),'] | d=',num2str(delta),'>',num2str(criterion),' | i=', num2str(instSample)])
 
   end
   %% ======================================

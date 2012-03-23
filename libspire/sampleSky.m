@@ -66,7 +66,7 @@ function [skySample ooptim] = sampleSky(init, options, data, hypers, ...
   %% sample = sampleSky(init, options, data, hypers, bands, Hrond250,
   %% Hrond360, Hrond520, index250, index360, index520, regOps, Nalpha,
   %% Nbeta, Norder)
-    
+
   stdN = 1/sqrt(hypers(1,1));
   stdX = 1/sqrt(hypers(2,1));
 
@@ -74,15 +74,15 @@ function [skySample ooptim] = sampleSky(init, options, data, hypers, ...
   for iscan = 1:Nscan
     data(iscan) = {data{iscan} + randn(size(data{iscan}))*stdN};
   end
-  
-  %% Sky perturbation 
+
+  %% Sky perturbation
   objectMean = zeros(size(init));
-  
+
   for iorder = 0:Norder-1
-    
+
     if size(regOps,1) == size(init,1)
       %% In fourrier space
-      
+
       %% Standart deviation is the square root of the variance and in
       %% $x^t Q x$, Q is the inverse variance.  Since the transfert
       %% fonction is real (the impultionnal response is even) we can
@@ -90,23 +90,23 @@ function [skySample ooptim] = sampleSky(init, options, data, hypers, ...
       standartDeviation = 1./sqrt(regOps(:,:,:,iorder+1));
     else
       %% In direct space
-      
+
       %% We have to compute in Fourrier space so compute the
       %% transfert function
-      
+
       inverseVariance = real(ri2fourier(regOps(:,:,:,iorder+1), ...
                                         Nalpha, Nbeta));
       standartDeviation = 1./(inverseVariance.^(1/2));
     end
     standartDeviation(1) = 1;
-    
+
     whiteComplexeNoise = complexeRandn(Nalpha,Nbeta);
-    
+
     objectMean(:,:,iorder+1) = ...
         stdX*standartDeviation.*whiteComplexeNoise;
-            
+
   end
-  
+
   %% Optimization
   [skySample ooptim] = inversionF(init, options, data, hypers, ...
                                   Hrond, index, coefs, offsets, ...
@@ -118,17 +118,17 @@ end
 
 function n = complexeRandn(Nalpha, Nbeta)
 %% COMPLEXERANDN - Return a complexe randn sample with correct normalisation
-%% 
+%%
 %% n = complexeRandn(Nalpha, Nbeta)
-%% 
+%%
 %% return the sum a real white idd gaussian sample of std 1/2, plus a
 %% imaginary white idd gaussian sample of std 1/2. The sum is normalized by
 %% 1/sqrt(number of pixel).
-%% 
-    
+%%
+
 %     n = (randn(Nalpha, Nbeta)*sqrt(1/2) + i*randn(Nalpha, Nbeta)*sqrt(1/2))./ ...
 %         sqrt(Nalpha*Nbeta);
-    
+
     n = ufft2(randn(Nalpha, Nbeta));
-    
+
 end
