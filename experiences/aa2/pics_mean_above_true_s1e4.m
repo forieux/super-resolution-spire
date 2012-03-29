@@ -98,11 +98,11 @@ riParams = {10, 1, band_250, central_wavelength_250, mean_sigma_coef, ...
             time_constante, gain};
 position = 5;
 
-obs250 = calcObsPix(coefs250, Nalpha, Nbeta, N_scan_total);
+obs250 = calcObsPix(coefs250, Nalpha, Nbeta, N_scan_total, 20);
 %obs250 = ones(size(obs250))
 
-burnin = 2000; %% If you don't know this value it is more than 100
-maxIter = 5000; %% If you don't know it is more 200
+burnin = 200; %% If you don't know this value it is more than 100
+maxIter = 2000; %% If you don't know it is more 200
 [skyEap gnChain gxChain instChain rate] = myopicUsmse(init, hypersInit, data250, ...
                                        Hrond250, index250, coefs250, ...
                                        offsets, regOp, Nalpha, ...
