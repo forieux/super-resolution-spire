@@ -27,10 +27,10 @@ figure(numfig)
 %%
 %% Cirrus
 
-load('/home/space/phd_results/variousDirty/dirtymaps')
-load('/home/space/phd_results/fillCirrus/optim50000','fillmap')
+load('/mnt/space/results/variousDirty/dirtymaps')
+load('/mnt/space/results/fillCirrus/optim50000','fillmap')
 
-placemount = '/home/space/phd_results/';
+placemount = '/mnt/space/results/';
 expname = 'variousRegCirrusDCT';
 Ntasks = 144;
 
@@ -68,21 +68,24 @@ colorbar
 
 print('-depsc',[figplace,'/coaddCirrus']);
 
+break
+
+
 % 
 %% EAP
-placemount = '/home/space/phd_results/';
+placemount = '/mnt/space/results/';
 load([placemount,'/init']);
 expname = 'usmseCirrus';
-placemount = '/home/space/phd_results/';
+placemount = '/mnt/space/results/';
 
 load([placemount,expname,'/EAP'])
 sol = conv2(xEap(:,:,2),fgaussian,'same');
 true = conv2(sky(:,:,2),fgaussian,'same');
 coadded = conv2(fillmap(:,:,2),fgaussian,'same');
 
-% load('/home/space/phd_results/variousDirty/dirtymaps')
-% %load('/home/space/phd_results/fillCirrus/coadd','coaddCirrus')
-% load('/home/space/phd_results/fillCirrus/optim50000','fillmap')
+% load('/mnt/space/results/variousDirty/dirtymaps')
+% %load('/mnt/space/results/fillCirrus/coadd','coaddCirrus')
+% load('/mnt/space/results/fillCirrus/optim50000','fillmap')
 
 clf
 imagesc(alpha(alphaB(1):alphaB(2)), beta(betaB(1):betaB(2)), ...
@@ -183,7 +186,7 @@ print('-depsc',[figplace,'/chaineGammaB'])
 %%
 
 iter = [400:400+length(squeeze(gbChain(2,400:end))) - 1];
-gbChainC = squeeze(gbChain(2,400:end)); 
+gbChainC = squeeze(gbChain(2,400:end));
 currentMeanC = cumsum(gbChainC)./[1:numel(gbChainC)];
 
 clf
@@ -225,7 +228,7 @@ print('-depsc',[figplace,'/chaineGammaX'])
 %%
 
 iter = [400:400+length(squeeze(gxChain(1,2,400:end))) - 1]';
-gxChainC = squeeze(gxChain(1,2,400:end)); 
+gxChainC = squeeze(gxChain(1,2,400:end));
 currentMeanC = cumsum(gxChainC)./[1:numel(gxChainC)]';
 
 clf
@@ -263,25 +266,25 @@ cumulant2r = zeros(size(cumulant1r));
 hit = 0;
 hist2D_DSP = zeros(100,100);
 for itask = 400:932
-    
+
     disp(num2str(itask));
-    
+
     name = [placemount,expname,'/samples/sample_',num2str(itask)];
     try
         load(name, 'skySample')
 
         im = conv2(skySample(:,:,2),fgaussian,'same');
         imr = estimCircularPSD(ufft2(window.*im(boundAlpha(1):boundAlpha(2),boundBeta(1):boundBeta(2))), deltaF);
-        
+
         cumulant1 = cumulant1 + im;
         cumulant1r = cumulant1r + imr;
 
         cumulant2 = cumulant2 + im.^2;
         cumulant2r = cumulant2r + imr.^2;
-        
+
         [hist_dsp, bins] = hist3(log([imr(f1:f2), rf(f1:f2)/alpha_step]), [100 100]);
         hist2D_DSP = hist2D_DSP + hist_dsp;
-        
+
         hit = hit+1;
     end
 end
@@ -356,7 +359,7 @@ imagesc(bins{2}, bins{1}, log(hist2D_DSP))
 hold on
 plot(log(rf(f1:f2)/alpha_step), log(dspTrue(f1:f2)),'r')
 axis xy
-    
+
 %%
 loglog(rf(f1:f2)/alpha_step, dspTrue(f1:f2),'r')
 hold on
@@ -377,14 +380,14 @@ break
 % 
 %% CirrusDot
 
-load('/home/space/phd_results/fillCirrusDot/coadd','coaddCirrusDot')
+load('/mnt/space/results/fillCirrusDot/coadd','coaddCirrusDot')
 madmap = coaddCirrusDot;
 clear coaddCirrusDot;
 
 boundAlpha = [160 420];
 boundBeta = [160 420];
 
-placemount = '/home/space/phd_results/';
+placemount = '/mnt/space/results/';
 expname = 'variousRegCirrusDotDCT';
 Ntasks = 144;
 
@@ -417,7 +420,7 @@ print('-depsc',[figplace,'/cirrusDot'])
 
 %%
 
-placemount = '/home/space/phd_results/'
+placemount = '/mnt/space/results/'
 load([placemount,'/init'])
 expname = 'usmseCirrusDot'
 
@@ -434,8 +437,8 @@ sol = conv2(xEap(:,:,2),fgaussian,'same');
 
 true = conv2(sky(:,:,2),fgaussian,'same');
 
-load('/home/space/phd_results/fillCirrusDot/coadd','coaddCirrusDot')
-load('/home/space/phd_results/fillCirrusDot/optim50000','fillmap')
+load('/mnt/space/results/fillCirrusDot/coadd','coaddCirrusDot')
+load('/mnt/space/results/fillCirrusDot/optim50000','fillmap')
 
 coadded = conv2(fillmap(:,:,2),fgaussian,'same');
 

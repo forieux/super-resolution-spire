@@ -1,11 +1,11 @@
-function [skyEap gnChain gxChain skyStd skyPSD skyPSDvar rf] = usmse(init, hypersInit, data, ...
+function [skyEap gnChain gxChain offsetsChain] = usmse(init, hypersInit, data, ...
                                           Hrond, index, coefs, ...
                                           offsets, regOps, Nalpha, ...
                                           Nbeta, Norder, Nscan, ...
                                           Nbolo, Nspeed, uspeed, ...
                                           theSpeeds, criterion, ...
                                           burnin, maxIter, ...
-                                          optptions, fgaussian, varargin)
+                                          optptions, varargin)
   %% USMSE - Unsupervised mean square error
   %%
   %% This algorithm implement an unsupervised (hyper parameters
@@ -59,7 +59,7 @@ function [skyEap gnChain gxChain skyStd skyPSD skyPSDvar rf] = usmse(init, hyper
   %% FUNCTION CALL
 
   %% Extras options
-  Nbaseoption = 21;
+  Nbaseoption = 20;
   if nargin > Nbaseoption
 
     for iargin = 1:2:nargin-Nbaseoption
@@ -76,16 +76,6 @@ function [skyEap gnChain gxChain skyStd skyPSD skyPSDvar rf] = usmse(init, hyper
 
   end
 
-  %%
-  sigma = 20;
-  boundAlpha = [160 420];
-  boundBeta = [160 420];
-  NalphaW = boundAlpha(2) - boundAlpha(1);
-  NbetaW = boundBeta(2) - boundBeta(1);
-
-  [ALPHA BETA] = ndgrid([-(NalphaW)/2:(NalphaW)/2],[-(NbetaW)/2:(NbetaW)/2]);
-  window = exp(-1/2 * (ALPHA.^2 + BETA.^2)/sigma^2);
-  deltaF = 0.004;
   %% Number of data
   Ndata = 0;
   for iscan = 1:Nscan
@@ -99,7 +89,6 @@ function [skyEap gnChain gxChain skyStd skyPSD skyPSDvar rf] = usmse(init, hyper
   skySample = ufft2(init);
   skyEap = zeros(size(skySample));
   previousSkyEap = zeros(size(skySample));
-  skyStd = zeros(size(skySample));
 
   %% Precision (inverse variance) of noise and sky
 
@@ -120,6 +109,8 @@ function [skyEap gnChain gxChain skyStd skyPSD skyPSDvar rf] = usmse(init, hyper
 
   gxChain = zeros(Norder,burnin);
   gxChain(:,1) = gxSample;
+
+  offsetsChain = zeros(length(offsets), burnin);
 
   %% If the hyper init is not provided
   if gnChain(1,1) == 0
@@ -143,6 +134,7 @@ function [skyEap gnChain gxChain skyStd skyPSD skyPSDvar rf] = usmse(init, hyper
     %% ======================================
     %% Sampling of the object precision
 
+
     for iorder = 1:Norder
 
       %% gammaI (Fx^dag) Q_I (Fx)
@@ -160,6 +152,9 @@ function [skyEap gnChain gxChain skyStd skyPSD skyPSDvar rf] = usmse(init, hyper
   end
 
   skySample = init;
+
+  offsetsSample = offsets;
+  fixedOffset = 1;
 
   %% Gibbs sampler
   for iteration = 2:maxIter
@@ -182,7 +177,7 @@ function [skyEap gnChain gxChain skyStd skyPSD skyPSDvar rf] = usmse(init, hyper
     hypers(2,:) = gxSample;
 
     [skySample ooptim] = sampleSky(skySample, optptions, data, hypers, ...
-                                   Hrond, index, coefs, offsets, ...
+                                   Hrond, index, coefs, offsetsSample, ...
                                    regOps, Nalpha, Nbeta, Norder, ...
                                    Nscan, Nbolo, Nspeed, uspeed, ...
                                    theSpeeds);
@@ -228,12 +223,23 @@ function [skyEap gnChain gxChain skyStd skyPSD skyPSDvar rf] = usmse(init, hyper
     gxChain(:,iteration) = gxSample;
 
     %% ======================================
+    %% Sampling of offsets
+
+    output = directInvariantF(skySample, Hrond, index, Nalpha, ...
+                              Nbeta, Norder, Nbolo, Nspeed, Nscan, ...
+                              uspeed, theSpeeds);
+
+    offsetsMean = estimOffsets(data, output, Nscan);
+    offsetsSample = offsetsMean + randn(size(offsetsMean)) ./ sqrt(gnSample);
+    offsetsSample(fixedOffset) = offsets(fixedOffset);
+    offsetsChain(:,iteration) = offsetsSample;
+
+    %% ======================================
     %% Current Empirical Mean
 
     if iteration > burnin
 
       skyEap = previousSkyEap + skySample;
-      skyStd = skyStd + conv2(real(uifft2(skySample)), fgaussian, 'same').^2;
 
       if iteration > (burnin + 1)
         norm = sum(abs(skyEap(:) / (iteration - burnin)));
@@ -255,26 +261,13 @@ function [skyEap gnChain gxChain skyStd skyPSD skyPSDvar rf] = usmse(init, hyper
 
       sfigure(numfig);
       clf
-      subplot(2,2,1)
-      imagesc(real(uifft2(skySample)))
+      subplot(1,2,1)
+      imagesc(real(uifft2(skySample(:,:,1))))
       axis image; colormap(hot); axis off
-      title('Sample')
 
-      subplot(2,2,2)
-      imagesc(real(uifft2(skyEap)))
+      subplot(1,2,2)
+      imagesc(real(uifft2(skyEap(:,:,1))))
       axis image; colormap(hot); axis off
-      title('Coefficients mean')
-
-      subplot(2,2,3)
-      imagesc(conv2(real(uifft2(skyEap)), fgaussian, 'same') / (iteration - burnin))
-      axis image; colormap(gray); axis off
-      title('Sky mean')
-
-      subplot(2,2,4)
-      imagesc(skyStd / (iteration - burnin) - (real(uifft2(skyEap)) / (iteration - burnin)).^2)
-      axis image; colormap(gray); axis off
-      title('Sky variance')
-
 
       sfigure(numfig+1);
       clf
@@ -302,10 +295,8 @@ function [skyEap gnChain gxChain skyStd skyPSD skyPSDvar rf] = usmse(init, hyper
 
     if delta < criterion
 
-      skyEap = skyEap / (iteration - burnin);
+      skyEap = skyEap / (iteration - burnin) ;
       skyEap = real(uifft2(skyEap));
-      skyStd = skyStd / (iteration - burnin);
-      skyStd = sqrt(skyStd - conv2(skyEap, fgaussian, 'same').^2);
       return
 
     end
@@ -322,8 +313,6 @@ function [skyEap gnChain gxChain skyStd skyPSD skyPSDvar rf] = usmse(init, hyper
   %% Empirical mean = EAP
   skyEap = skyEap / (maxIter - burnin);
   skyEap = real(uifft2(skyEap));
-  skyStd = skyStd / (iteration - burnin);
-  skyStd = sqrt(skyStd - conv2(skyEap, fgaussian, 'same').^2);
 
 end
 

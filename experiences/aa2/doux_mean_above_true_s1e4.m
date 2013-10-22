@@ -1,7 +1,7 @@
 clear all
 
 %% Base
-placemount = '/mnt/espace/espace/results/'
+placemount = '/mnt/space/results/'
 expname = 'aa2';
 system(['mkdir -p ',placemount,expname]);
 addpath('../../')
@@ -12,7 +12,7 @@ addpath('../../libspire')
 randn('state',0)
 rand('state',0)
 
-%% 
+%%
 paramsInstrument
 paramsObservation; simulatePointing;
 paramsSky
@@ -64,6 +64,7 @@ G = Hrond250(1);
                                                        Nbeta);
 
 regOp = circDalpha + circDbeta;
+regOp(1) = 0;
 
 %% Simulate data
 std250 = (1e-3); gammaB250 = 1/std250^2;
@@ -83,14 +84,12 @@ cgoptions.thresold = 1e-8;
 cgoptions.maxIter = 40;
 %% cgoptions.numfig = 1000;
 criterion = 1e-4;
-burnin = 400; %% If you don't know this value it is more than 100
-maxIter = 2000; %% If you don't know it is more 200
 
 init = zeros(Nalpha, Nbeta);
 
 hypersInit = zeros(2,3);
 hypersInit(1,1) = gammaB250;
-hypersInit(2,1) = 1e6;
+hypersInit(2,1) = 3.5e+11;
 
 meanInst = physical_sigma_coef;
 mean_sigma_coef = meanInst;
@@ -100,6 +99,11 @@ riParams = {10, 1, band_250, central_wavelength_250, mean_sigma_coef, ...
             time_constante, gain};
 position = 5;
 
+obs250 = calcObsPix(coefs250, Nalpha, Nbeta, N_scan_total, 20);
+%obs250 = ones(size(obs250))
+
+burnin = 200;
+maxIter = 2000;
 [skyEap gnChain gxChain instChain rate] = myopicUsmse(init, hypersInit, data250, ...
                                        Hrond250, index250, coefs250, ...
                                        offsets, regOp, Nalpha, ...
@@ -109,13 +113,13 @@ position = 5;
                                        sigmaInst, meanInst, ...
                                        riParams, position, ...
                                        criterion, burnin, maxIter, ...
-                                       cgoptions, 100);
+                                       cgoptions, 100, obs250);
 
 disp(['Vrai :', num2str(true_sigma_coef)])
 disp(['Mean (sigma) :', num2str(meanInst), ' (', num2str(sigmaInst),')'])
 disp(['Mean + sigma :', num2str(meanInst + sigmaInst)])
 disp(['Est :', num2str(mean(instChain(500:end)))])
-                                   
+
 name = [placemount,expname,'/doux_mean_above_true_s1e4'];
 try
     save(name)

@@ -15,14 +15,14 @@ opt_efficiency = 0.95*0.9; % wihtout dim, between 0 and 1
 band_250 = [213, 290]*10^-6; % in meter
 band_360 = [301, 405]*10^-6; % in meter
 band_520 = [410, 611]*10^-6; % in meter
-                                                             
+
 %% This is the real central wavelength (with our above definition of the
 %% filter bound)
 central_wavelength_250 = mean(band_250,2); % in meter
 central_wavelength_360 = mean(band_360,2); % in meter
 central_wavelength_520 = mean(band_520,2); % in meter
 
-%% Feedhorns 
+%% Feedhorns
 
 %% Gaussian width
 sigma_coef = 24.6/((353*10^-6)*sqrt(log(256))); % pourquoi 353 ???????
@@ -34,7 +34,7 @@ sigma_coef = 24.6/((353*10^-6)*sqrt(log(256))); % pourquoi 353 ???????
 
 %% Bolometer. Linear model
 
-time_constante = 0%5.7e-3; % 19.45e-3; % s 
+time_constante = 0%5.7e-3; % 19.45e-3; % s
 gain = 3.31e8; % V/W
 %gain = 1;
 

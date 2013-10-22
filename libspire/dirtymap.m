@@ -38,34 +38,34 @@ function map = dirtymap(scans, index, offsets, Nalpha, Nbeta, Nscan, ...
 
   coefs = zeros(Nalpha, Nbeta);
   map = zeros(Nalpha, Nbeta);
-  
+
   for iscan = 1:Nscan
-    
+
     %% Coadition of the data that point the same thing on the sky. To
     %% avoid looping on bolometer, a 2D of (Nalpha x Nbeta) x Nbolo is
     %% used. The data from each bolo will be on a differente column and a
     %% final sum is done. To avoid excess memory consumption, a sparse
     %% matrix is used.
-    
+
     %% There is Nbolo bolometer. "length(index)/Nbolo" is normally the
     %% number of time sample in that scan. Reshape in one row
     indexBolo = reshape(repmat(1:Nbolo, [numel(index{iscan})/Nbolo 1]), [numel(index{iscan}) 1]);
-    
+
     %% Projection on convolued coefficient space. This operation is
     %% critical. It is supposed that the index are arranged in the
     %% bolometer order, and so time order for one bolometer. This must be
     %% arranged like this for index and scans.
-    im = sparse(index{iscan}, indexBolo, scans{iscan} - repmat(offsets, size(scans{iscan},1),1), Nalpha*Nbeta, Nbolo);
+    im = sparse(index{iscan}, indexBolo, scans{iscan} - reshape(repmat(offsets, size(scans{iscan},1),1), size(scans{iscan})), Nalpha*Nbeta, Nbolo);
     imCoefs = sparse(index{iscan}, indexBolo, 1, Nalpha*Nbeta, Nbolo);
-    
+
     %% mean the bolo data (on dim 2), and reshape like an image.
     map = map + reshape(sum(im,2), Nalpha, Nbeta);
     coefs = coefs + reshape(sum(imCoefs,2), Nalpha, Nbeta);
-    
+
   end
-  
+
   %% Mean of all scan
   map(coefs ~= 0) = map(coefs ~= 0)./coefs(coefs ~=0);
-  
+
 end
 

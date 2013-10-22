@@ -45,11 +45,11 @@ function [map offsets] = dirtymapOffsets(scans, offsets, index, Nalpha, Nbeta, N
 
   for iRun = 1:repeat
 %     disp(['Estimation of offsets for coaddition (',num2str(iRun),'/',num2str(repeat),')']);
-      
+
     map = dirtymap(scans, index, offsets, Nalpha, Nbeta, Nscan, Nbolo);
     dataRepro = directDirty(map, index, Nalpha, Nbeta, Nbolo, Nscan);
     offsets = estimOffsets(scans, dataRepro, Nscan);
-    
+
   end
-  
+
 end

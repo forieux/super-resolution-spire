@@ -1,3 +1,6 @@
+%% Unsupervised inversion on ngc7023: estimation of hyper-parameter
+%% jointly with the image
+
 clear all
 
 format('long');
@@ -7,18 +10,21 @@ load ../data&true/pos_fits_image
 
 load mycm
 
-% racine = '/espace/spire/';
-% expname = 'ngc7023/';
-% system(['mkdir -p ',racine,expname]);
-name = 'ngc7023';
+racine = '../SPIRE/';
+expname = 'upsw/';
+system(['mkdir -p ',racine,expname]);
+fits_name = 'result_PSW_6arcsec_13avril_pv.fits';
+gpac_name = '/gpac_PSW_13avril_fits_pv';
 
 %% set path, specially gpac
 path(path,'../')
 path(path,'../libspire')
 path(path,'../utils')
+path(path,'/home/orieux/codes/orieux_matlab_tb/fourier/')
 
 scan_tot = 10;
 pointing250 = pointing{1};
+pointing_band = pointing{1};
 pointing360 = pointing{2};
 pointing520 = pointing{3};
 
@@ -38,8 +44,8 @@ decz250=mean(temp_dec);
 tan_ra=deg2rad(315.47608333333335);
 tan_dec=deg2rad(68.15972222222223);
 
-%% Même pixel avant et après projection pour la coordonnée de référence
-%% (quelque soit le sytême de coordonnée)
+%% M?me pixel avant et apr?s projection pour la coordonn?e de r?f?rence
+%% (quelque soit le syt?me de coordonn?e)
 ptot1=[];
 ptot2=[];
 for iscan = 1:scan_tot
@@ -63,11 +69,11 @@ for iscan = 1:scan_tot
   clear z
 end
 
-paramsInstrumentNGC7023_me
-paramsObsNGC7023_me
-paramsSkyNGC7023_me
+paramsInstrumentNGC7023
+paramsObsNGC7023
+paramsSkyNGC7023
 
-bound = 4*sigma_coef*max(band_520) + 4*60; % arcsec
+bound = 4*sigma_coef*max(band_520) + 60; % arcsec
 [alpha beta] = computeAxis(pointing250, sky_alpha_period, sky_beta_period, ...
                           bound, N_scan_total);
 
@@ -85,13 +91,12 @@ bound = 4*sigma_coef*max(band_520) + 4*60; % arcsec
 
 %% The coaddition without offsets and estimation of offsets
 offsets = zeros(1,Nbolo250);
-[coaddPSW offsetsPSWcoadd] = dirtymapOffsets(data{1}, index250coadd, ...
-                                        coefs250coadd, Nalphacoadd, ...
-                                        Nbetacoadd, N_scan_total, ...
-                                        unique_speed, the_speeds, ...
-                                        Nbolo250, 20);
 
-break
+[coadd offsets] = dirtymapOffsets(data{1}, zeros(Nbolo250, 1), index250coadd, ...
+    Nalphacoadd, ...
+    Nbetacoadd, N_scan_total, ...
+    Nbolo250, 20); % 20
+
 %% Inversion
 init = zeros(Nalpha, Nbeta);
 objectMean = zeros(size(init));
@@ -114,58 +119,92 @@ G = Hrond250(1);
                                                        Nbeta);
 
 regOp = circDalpha + circDbeta;
+regOp(1) = 0;
 
 %% Conjugate gradient options
-cgoptions.thresold = 1e-10; cgoptions.maxIter = 40; %cgoptions.numfig = 1000;
+cgoptions.thresold = 1e-8; cgoptions.maxIter = 40; %cgoptions.numfig = 1000;
+
+criterion = 1e-4;
+burnin = 500;
+maxIter = 2000;
 
 %% Hypers parameters value
 hypers = zeros(2,1);
-hypers(1,1) = 1e-5;
-hypers(2,1) = 1e1;
+hypersInit(1,1) = 0.15;
+hypersInit(2,1) = 500000;
 
-[mapCgO offsetsCg ooptimCg] = inversionOffsets(init, cgoptions, ...
-                                              data{1}, hypers, ...
-                                              Hrond250, index250, ...
-                                              coefs250, offsetsPSWcoadd, ...
-                                              regOp, objectMean, ...
-                                              Nalpha, Nbeta, Norder, ...
-                                              N_scan_total, ...
-                                              Nbolo250, Nspeed, ...
-                                              unique_speed, the_speeds, 1);
+tic
+[skyEap gnChain gxChain offsetsChain] = usmseWithOffsets(init, hypersInit, data{1}, Hrond250, index250, coefs250, offsets, regOp, Nalpha, Nbeta, Norder, N_scan_total, Nbolo250, Nspeed, unique_speed, the_speeds, criterion, burnin, maxIter, cgoptions);
+toc
 
+skyInv = conv2(skyEap,fgaussian,'same');
+
+%%
 figure(1)
 clf
-
 subplot(121)
-imagesc(alphaCoadd, betaCoadd, coaddPSW/G); axis image; colormap(hot); colorbar
+imagesc(alphaCoadd, betaCoadd, coadd/G); axis image; colormap(hot); colorbar
 
 subplot(122)
-imagesc(alpha, beta, mapCgO); axis image; colormap(hot); colorbar
+imagesc(alpha, beta, skyInv); axis image; colormap(hot); colorbar
 
 figure(2)
 clf
-
 subplot(121)
-imagesc(alphaCoadd, betaCoadd, coaddPSW/G); axis image; colormap(cm); colorbar
+imagesc(alphaCoadd, betaCoadd, coadd/G); axis image; colormap(cm); colorbar
 
 subplot(122)
-imagesc(alpha, beta, mapCgO); axis image; colormap(cm); colorbar
+imagesc(alpha, beta, skyInv); axis image; colormap(cm); colorbar
 
 figure(3)
 clf
-
 subplot(121)
-imagesc(alphaCoadd, betaCoadd, log(coaddPSW/G + abs(min(coaddPSW(:)/G)))); axis image; colormap(hot); colorbar
+imagesc(alphaCoadd, betaCoadd, log(coadd/G + abs(min(coadd(:)/G)))); axis image; colormap(hot); colorbar
 
 subplot(122)
-imagesc(alpha, beta, log(mapCgO + abs(min(mapCgO(:))))); axis image; colormap(hot); colorbar
+imagesc(alpha, beta, log(skyInv + abs(min(skyInv(:))))); axis image; colormap(hot); colorbar
 
 figure(4)
-theAlpha = -100;
+clf
+subplot(121)
+imagesc(alphaCoadd, betaCoadd, sqrt(coadd/G + abs(min(coadd(:)/G)))); axis image; colormap(hot); colorbar
+subplot(122)
+imagesc(alpha, beta, sqrt(skyInv + abs(min(skyInv(:))))); axis image; colormap(hot); colorbar
+
+figure(5)
+theAlpha = -120;
 ligne = find(alphaCoadd <= theAlpha, 1, 'last' );
 ligne2 = find(alpha <= theAlpha, 1, 'last' );
 clf
-plot(beta, mapCgO(ligne2,:),'r')
+plot(beta, skyInv(ligne2,:),'r')
 hold on
-plot(betaCoadd, coaddPSW(ligne,:)/G)
+plot(betaCoadd, coadd(ligne,:)/G)
 
+figure(6)
+clf
+minAlpha = find(alphaCoadd <= -200, 1, 'last');
+maxAlpha = find(alphaCoadd >= -50, 1, 'first');
+minBeta = find(betaCoadd <= -150, 1, 'last');
+maxBeta = find(betaCoadd >= 150, 1, 'first');
+mesh(betaCoadd(minBeta:maxBeta), alphaCoadd(minAlpha:maxAlpha), coadd(minAlpha:maxAlpha,minBeta:maxBeta)/G);
+
+figure(7)
+minAlpha = find(alpha <= -200, 1, 'last');
+maxAlpha = find(alpha >= -50, 1, 'first');
+minBeta = find(beta <= -150, 1, 'last');
+maxBeta = find(beta >= 150, 1, 'first');
+mesh(beta(minBeta:maxBeta), alpha(minAlpha:maxAlpha), skyInv(minAlpha:maxAlpha,minBeta:maxBeta));
+
+saved_offsets_chain = offsetsChain([2,54],:);
+save real_data_results.mat saved_offsets_chain skyEap gnChain gxChain
+
+break
+
+%% write the fits file
+path(path,'../mfitsio-1.2.4-src/mfitsio/')
+map=fliplr(init(:,:,1));
+%map=init(:,:,1);
+path(path,'../')
+make_header
+
+fits_write(fits_name,S,C,map');

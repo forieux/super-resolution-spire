@@ -20,9 +20,11 @@ gpac_name = '/gpac_PSW_13avril_fits_pv';
 path(path,'../')
 path(path,'../libspire')
 path(path,'../utils')
+path(path,'/home/orieux/codes/orieux_matlab_tb/fourier/')
 
 scan_tot = 10;
 pointing250 = pointing{1};
+pointing_band = pointing{1};
 pointing360 = pointing{2};
 pointing520 = pointing{3};
 
@@ -71,8 +73,6 @@ paramsInstrumentNGC7023
 paramsObsNGC7023
 paramsSkyNGC7023
 
-break
-
 bound = 4*sigma_coef*max(band_520) + 60; % arcsec
 [alpha beta] = computeAxis(pointing250, sky_alpha_period, sky_beta_period, ...
                           bound, N_scan_total);
@@ -92,12 +92,11 @@ bound = 4*sigma_coef*max(band_520) + 60; % arcsec
 %% The coaddition without offsets and estimation of offsets
 offsets = zeros(1,Nbolo250);
 
-[coadd offsets] = dirtymapOffsets(data{1}, index250coadd, ...
-                                  coefs250coadd, Nalphacoadd, ...
-                                  Nbetacoadd, N_scan_total, ...
-                                  unique_speed, the_speeds, ...
-                                  Nbolo250, 20);
-              
+[coadd offsets] = dirtymapOffsets(data{1}, zeros(Nbolo250, 1), index250coadd, ...
+    Nalphacoadd, ...
+    Nbetacoadd, N_scan_total, ...
+    Nbolo250, 20); % 20
+
 %% Inversion
 init = zeros(Nalpha, Nbeta);
 objectMean = zeros(size(init));
@@ -120,14 +119,14 @@ G = Hrond250(1);
                                                        Nbeta);
 
 regOp = circDalpha + circDbeta;
-regOp = ir2fourier([0 -1 0; -1 4 -1; 0 -1 0], Nalpha, Nbeta);
+regOp(1) = 0;
 
 %% Conjugate gradient options
 cgoptions.thresold = 1e-8; cgoptions.maxIter = 40; %cgoptions.numfig = 1000;
 
 criterion = 1e-4;
 burnin = 500;
-maxIter = 1000;
+maxIter = 2000;
 
 %% Hypers parameters value
 hypers = zeros(2,1);
@@ -198,7 +197,7 @@ minAlpha = find(alpha <= -200, 1, 'last');
 maxAlpha = find(alpha >= -50, 1, 'first');
 minBeta = find(beta <= -150, 1, 'last');
 maxBeta = find(beta >= 150, 1, 'first');
-mesh(beta(minBeta:maxBeta), alpha(minAlpha:maxAlpha), skyInv(minAlpha:maxAlpha,minBeta:maxBeta)); 
+mesh(beta(minBeta:maxBeta), alpha(minAlpha:maxAlpha), skyInv(minAlpha:maxAlpha,minBeta:maxBeta));
 
 break
 

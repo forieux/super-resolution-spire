@@ -82,14 +82,14 @@ for iscan = 1:scan_tot
     pointing_band(iscan) = {z};
     z1_reshape = reshape( z(1,:) ,size(z(1,:),2)/Nbolo250,Nbolo250);
     z2_reshape = reshape( z(2,:) ,size(z(2,:),2)/Nbolo250,Nbolo250);
-    
+
     zdiff1= z1_reshape(2:end,:) - z1_reshape(1:end-1,:);%diff(z1_reshape,1,1);
     zdiff2= z2_reshape(2:end,:) - z2_reshape(1:end-1,:);%diff(z2_reshape,1,1);
     vit_alpha=zdiff1./temporal_sampling_periode;
     vit_beta=zdiff2./temporal_sampling_periode;
     vit_alpha_mean(iscan)=mean(mean(vit_alpha));
     vit_beta_mean(iscan)=mean(mean(vit_beta));
-    
+
     clear z zdiff1 zdiff2 vit_alpha vit_beta
 end
 
@@ -122,23 +122,20 @@ bound = 4*sigma_coef*max(band_520) + 4*60; % arcsec
 offsets = zeros(1,Nbolo250);
 
 
-[coaddPSW offsetsPSW] = dirtymapOffsets(data{1}, index250coadd, ...
-    coefs250coadd, Nalphacoadd, ...
+
+[coaddPSW offsetsPSW] = dirtymapOffsets(data{1}, zeros(Nbolo250, 1), index250coadd, ...
+    Nalphacoadd, ...
     Nbetacoadd, N_scan_total, ...
-    unique_speed, the_speeds, ...
     Nbolo250, 20); % 20
 
 
+% coaddtest = dirtymap(data{1}, index250coadd, offsetscoefs250coadd, offsets, Nalphacoadd, Nbetacoadd, ...
+%     N_scan_total, unique_speed, the_speeds, Nbolo250);
 
-coaddtest = dirtymap(data{1}, index250coadd, coefs250coadd, offsets, Nalphacoadd, Nbetacoadd, ...
-    N_scan_total, unique_speed, the_speeds, Nbolo250);
+figure(1)
+imagesc(coaddPSW); axis image
 
-% figure(1)
-% subplot(1,2,1)
-% imagesc(coaddtest); axis image
-% subplot(1,2,2)
-% imagesc(coaddPSW); axis image
-
+break
 
 
 %% Inversion
@@ -201,17 +198,17 @@ imagesc(Hdirect250(:,:,1,2)); axis image
 data250=data{1};
 
 for hyp_ind=1:size(hyp_tab,2)
-    
+
     disp(['Hyper ',num2str(hyp_ind),'/',num2str(size(hyp_tab,2))])
     %% Hypers parameters value
     hypers = zeros(2,1);
     hypers(1,1) = hyp_tab(hyp_ind); % 1e-5
     hypers(2,1) = 1e1;
-    
+
     fits_name = strcat('result_PSW_6arc_',num2str(10/hypers(1,1)),'_0_filter.fits');
-    
+
     for iter=1:3
-        
+
         iter
         %%% Estimation de x sachant Offset et y
         %     NewData=data;
@@ -222,8 +219,8 @@ for hyp_ind=1:size(hyp_tab,2)
         %         NewData250(iscan) = {a};
         %     end
         %     NewData(1)={NewData250};
-        
-        
+
+
         [mapCgO offsetsCg ooptimCg] = inversionOffsets(init, cgoptions, ...
             data{1}, hypers, ...
             Hrond250, index250, ...
@@ -233,13 +230,13 @@ for hyp_ind=1:size(hyp_tab,2)
             N_scan_total, ...
             Nbolo250, Nspeed, ...
             unique_speed, the_speeds, 1);
-        
-        
+
+
         SortieModel = directInvariant(mapCgO, Hrond250, index250, ...
             Nalpha, Nbeta, Norder, Nbolo250, Nspeed, scan_tot, unique_speed, the_speeds);
-        
-        
-        
+
+
+
         Sortie250=  SortieModel;
         a = data250{1}-Sortie250{1};
         for iscan = 2:10
@@ -247,11 +244,11 @@ for hyp_ind=1:size(hyp_tab,2)
             a = cat(1,a,b);
         end
         offsets = mean(a,1);
-        
+
     end
     tt=toc;
     disp(['Speed : ',num2str(tt)])
-    
+
     % figure(1)
     % clf
     %
@@ -287,8 +284,8 @@ for hyp_ind=1:size(hyp_tab,2)
     % plot(beta, mapCgO(ligne2,:),'r')
     % hold on
     % plot(betaCoadd, coaddPSW(ligne,:)/G)
-    
-end   
+
+end
     %% write the fits file
         path(path,'/home/mhusson/Matfiles/mfitsio-1.2.4-src/mfitsio/')
         map=flipud(mapCgO);
@@ -296,9 +293,9 @@ end
         %map=init(:,:,1);
         path(path,'/home/mhusson/Matfiles/')
         make_header
-    
+
         fits_write(fits_name,S,C,map);
-    
+
 
 figure(5)
 imagesc(mapCgO); axis image
