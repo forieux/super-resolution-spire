@@ -2,8 +2,14 @@
 Super-resolution for SPIRE
 ==========================
 
-These codes are no more maintained. You can however contact me for
-questions.
+Preamble
+--------
+
+This code is no more maintained and not used, up to my knownledge. You
+can however contact me for questions (orieux at iap).
+
+Intro
+-----
 
 This repository contains the MATLAB code to produce the results of
 Super-Resolution of image with SPIRE/Herschel data published in
