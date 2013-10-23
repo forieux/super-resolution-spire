@@ -25,7 +25,7 @@ Super-Resolution of image with SPIRE/Herschel data published in
        making", Astronomy & Astrohpysics, 2013
 
 Additionnal information can be found `here
-<http://research.orieux.fr>`_.
+<http://research.orieux.fr/phd.html>`_.
 
 The research initied during this work have continued to gives the
 `SUPREME <http://www.ias.u-psud.fr/supreme/home.php>`_ software
