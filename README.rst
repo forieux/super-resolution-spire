@@ -1,5 +1,12 @@
+==========================
+Super-resolution for SPIRE
+==========================
+
+These codes are no more maintained. You can however contact me for
+questions.
+
 This repository contains the MATLAB code to produce the results of
-Super-Resolution of image with SPIRE - Herschel data published in
+Super-Resolution of image with SPIRE/Herschel data published in
 
 .. [1] F. Orieux, "Bayesian inversion for myopic and unsupervised
        super-resolution imaging. Application to SPIRE of spatial
@@ -18,8 +25,8 @@ Super-Resolution of image with SPIRE - Herschel data published in
        making", Astronomy & Astrohpysics, 2013
 
 Additionnal information can be found `here
-<http://research.orieux.fr>`_. These codes are no more maintained.
+<http://research.orieux.fr>`_.
 
 The research initied during this work have continued to gives the
 `SUPREME <http://www.ias.u-psud.fr/supreme/home.php>`_ software
-package. I am not, however, particulary involved in this project.
+package. I am not, however, involved in this project.
