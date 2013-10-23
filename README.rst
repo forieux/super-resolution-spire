@@ -8,8 +8,8 @@ Preamble
 This code is no more maintained and not used, up to my knownledge. You
 can however contact me for questions (orieux at iap).
 
-Intro
------
+Introduction
+------------
 
 This repository contains the MATLAB code to produce the results of
 Super-Resolution of image with SPIRE/Herschel data published in
@@ -38,7 +38,7 @@ The research initied during this work have continued to gives the
 package. I am not, however, involved in this project.
 
 Contact
-=======
+-------
 
 Several personne are associated with this work:
 
