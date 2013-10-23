@@ -17,9 +17,9 @@ Super-Resolution of image with SPIRE - Herschel data published in
        regularized inversion Illustration for Herschel/SPIRE map
        making", Astronomy & Astrohpysics, 2013
 
-Additionnal information can be found
-[here](http://research.orieux.fr). These codes are no more maintained.
+Additionnal information can be found `here
+<http://research.orieux.fr>`_. These codes are no more maintained.
 
 The research initied during this work have continued to gives the
-[SUPREME](http://www.ias.u-psud.fr/supreme/home.php) software
+`SUPREME <http://www.ias.u-psud.fr/supreme/home.php>`_ software
 package. I am not, however, particulary involved in this project.
