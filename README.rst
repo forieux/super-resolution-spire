@@ -36,3 +36,13 @@ Additionnal information can be found `here
 The research initied during this work have continued to gives the
 `SUPREME <http://www.ias.u-psud.fr/supreme/home.php>`_ software
 package. I am not, however, involved in this project.
+
+Contact
+=======
+
+Several personne are associated with this work:
+
+* François Orieux - IAP - CNRS
+* Jean-François Giovannelli - IMS - Bordeaux
+* Thomas Rodet - ENS Cachan
+* Alain Abergel - IAS - Univ. Paris Sud 11
