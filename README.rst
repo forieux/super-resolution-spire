@@ -6,7 +6,7 @@ Preamble
 --------
 
 This code is no more maintained and not used, up to my knownledge. You
-can however contact me for questions (orieux at iap).
+can however contact me for questions (orieux at l2s).
 
 Introduction
 ------------
@@ -42,7 +42,7 @@ Contact
 
 Several personne are associated with this work:
 
-* François Orieux - IAP - CNRS
+* François Orieux - L2S - univ. Paris-Sud 11
 * Jean-François Giovannelli - IMS - Bordeaux
 * Thomas Rodet - ENS Cachan
-* Alain Abergel - IAS - Univ. Paris Sud 11
+* Alain Abergel - IAS - Univ. Paris-Sud 11
